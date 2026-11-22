@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "tap-studio-renderer/result.schema.json",
+  "title": "TAP Studio video result",
+  "description": "What the task `generate-video` returns and what is POSTed to webhooks.result_url.",
+  "type": "object",
+  "required": ["job_id", "status", "format", "video_url", "thumbnail_url", "cost", "started_at", "finished_at", "error"],
+  "additionalProperties": false,
+  "properties": {
+    "event": { "const": "job.result" },
+    "job_id": { "type": "string" },
+    "run_id": { "type": ["string", "null"], "description": "The Trigger.dev run id." },
+    "status": { "enum": ["succeeded", "failed"] },
+    "format": { "enum": ["motion_vsl", "reaction_showcase", "song_ad"] },
+    "video_url": { "type": ["string", "null"] },
+    "thumbnail_url": { "type": ["string", "null"] },
+    "video": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "duration_s": { "type": "number" },
+        "width": { "type": "integer" },
+        "height": { "type": "integer" },
+        "fps": { "type": "number" },
+        "bytes": { "type": "integer" },
+        "loudness_lufs": { "type": ["number", "null"] }
+      }
+    },
+    "title": { "type": ["string", "null"], "description": "A short title for the video." },
+    "summary": { "type": ["string", "null"], "description": "What the agent made and why, in a few sentences." },
+    "script": { "type": ["string", "null"], "description": "The words spoken or sung." },
+    "cost": {
+      "type": "object",
+      "required": ["vidlab_usd", "agent_usd", "total_usd"],
+      "additionalProperties": false,
+      "properties": {
+        "vidlab_usd": { "type": "number" },
+        "agent_usd": { "type": "number" },
+        "total_usd": { "type": "number" },
+        "items": { "type": "array", "items": { "type": "object", "required": ["label", "usd"], "properties": { "label": { "type": "string" }, "model": { "type": "string" }, "usd": { "type": "number" } } } }
+      }
+    },
+    "safety": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": { "mode": { "type": "string" }, "passed": { "type": "boolean" }, "findings": { "type": "array", "items": { "type": "string" } } }
+    },
+    "agent": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": { "model": { "type": "string" }, "turns": { "type": "integer" }, "seconds": { "type": "number" } }
+    },
+    "started_at": { "type": "string" },
+    "finished_at": { "type": "string" },
+    "error": { "type": ["object", "null"], "additionalProperties": false, "properties": { "code": { "type": "string" }, "message": { "type": "string" } } },
+    "metadata": { "type": ["object", "null"] }
+  }
+}

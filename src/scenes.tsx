@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, Easing, interpolate, Loop, OffthreadVideo, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { BLACK, clamp, ORANGE, popAt, prog, RED, SceneProps, spr, SW, tx, useCues, usePop, W, X0 } from "./engine";
 import { A, Anon, Background, Bg, BrandBadge, Card, Cover, COVERS, DownArrow, Glyph, I, Ico, ink, Logo, Mark, Phone, Pop, ProductBox, Slam, Stamp, Tag, Tape } from "./ui";
 
@@ -870,7 +870,48 @@ const Ticker: React.FC<SceneProps> = ({ scene, props }) => {
   );
 };
 
+/* ------------------------------------------------------------------ footage: a video clip full-frame (AI footage, a reaction, a song video) with optional tag and headline */
+
+const Footage: React.FC<SceneProps> = ({ scene, props }) => {
+  const { fps } = useVideoConfig();
+  const [tagAt, headAt] = useCues(scene, [props.tagCue, props.headCue]);
+  const src = /^(https?:|data:|blob:)/.test(props.url) ? props.url : staticFile(String(props.url).replace(/^\//, ""));
+  const video = (
+    <OffthreadVideo src={src} trimBefore={Math.round((props.startFrom ?? 0) * fps)} volume={props.volume ?? 0} muted={(props.volume ?? 0) === 0} style={{ width: "100%", height: "100%", objectFit: props.fit ?? "cover" }} />
+  );
+  const lines: string[] = props.head ? (Array.isArray(props.head) ? props.head : [props.head]) : [];
+  const size = (t: string) => Math.min(190, Math.floor(SW / (t.replace(/\*/g, "").length * 0.54)));
+  return (
+    <AbsoluteFill style={{ background: BLACK }}>
+      {props.clipSeconds ? (
+        <Loop durationInFrames={Math.max(1, Math.round((props.clipSeconds - (props.startFrom ?? 0)) * fps))}>{video}</Loop>
+      ) : (
+        video
+      )}
+      {props.dim ? <AbsoluteFill style={{ background: `rgba(10,10,10,${props.dim})` }} /> : null}
+      {props.tag || lines.length ? <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(10,10,10,0.72) 0%, rgba(10,10,10,0.45) 22%, rgba(10,10,10,0) 42%)" }} /> : null}
+      {props.tag ? (
+        <div style={{ position: "absolute", left: X0, top: 268, width: SW, display: "flex", justifyContent: "center" }}>
+          <Pop at={Math.min(tagAt, 2)} rot={-2}>
+            <Tag size={46} bg={ORANGE} color={BLACK}>
+              {props.tag}
+            </Tag>
+          </Pop>
+        </div>
+      ) : null}
+      {lines.length ? (
+        <div style={{ position: "absolute", left: X0, top: props.tag ? 400 : 280, width: SW, display: "flex", flexDirection: "column", alignItems: "center", gap: 10, textAlign: "center" }}>
+          {lines.map((l, i) => (
+            <Slam key={i} t={l} at={headAt + i * 5} size={size(l)} color="#fff" bg="black" style={{ textShadow: "0 6px 0 rgba(10,10,10,0.55)" }} />
+          ))}
+        </div>
+      ) : null}
+    </AbsoluteFill>
+  );
+};
+
 export const SCENES: Record<string, React.FC<SceneProps>> = {
+  footage: Footage,
   ticker: Ticker,
   pills: Pills,
   checklist: Checklist,

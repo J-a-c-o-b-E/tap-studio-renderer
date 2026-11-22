@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "tap-studio-renderer/job.schema.json",
+  "title": "TAP Studio video job",
+  "description": "One video for the TAP Studio Agent to make. The payload of the Trigger.dev task `generate-video`.",
+  "type": "object",
+  "required": ["job_id", "format", "product", "budget", "output"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "job_id": { "type": "string", "minLength": 1, "maxLength": 100, "pattern": "^[A-Za-z0-9._-]+$", "description": "Your id for the job. Echoed in every webhook and in the result." },
+    "format": {
+      "enum": ["motion_vsl", "reaction_showcase", "song_ad"],
+      "description": "motion_vsl: a voiced motion-graphics video made entirely with the renderer. reaction_showcase: an AI reaction clip (ugc-image-1 + seedance-2.5) followed by motion graphics. song_ad: a VidLab song-ad video with renderer captions and end card."
+    },
+    "product": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "description": "What the video is about. The agent states only what is given here.",
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "price": { "type": "string", "maxLength": 40, "description": "The price as it should appear, for example \"$5\". The only amount the video may show." },
+        "url": { "type": "string", "maxLength": 300 },
+        "cta": { "type": "string", "maxLength": 60, "description": "Button text on the end card, for example \"GET STARTED –\"." },
+        "facts": { "type": "array", "maxItems": 20, "items": { "type": "string", "maxLength": 300 }, "description": "True statements the video may use (what is included, numbers, who it is for)." },
+        "image_urls": { "type": "array", "maxItems": 6, "items": { "type": "string", "pattern": "^https://" }, "description": "Product images for the AI models to use as references." }
+      }
+    },
+    "brief": { "type": "string", "maxLength": 4000, "description": "Angle, audience, tone, anything the video must or must not do." },
+    "script": { "type": "string", "maxLength": 8000, "description": "Optional. A script to use word for word (motion_vsl: the voiceover; song_ad: the lyrics)." },
+    "duration_s": { "type": "number", "minimum": 8, "maximum": 180, "description": "Target length in seconds. Default: 30 for motion_vsl, 20 for reaction_showcase, the song's own length for song_ad." },
+    "language": { "type": "string", "default": "English" },
+    "voice": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Voiceover settings (motion_vsl and reaction_showcase).",
+      "properties": {
+        "voice_id": { "type": "string", "default": "English_expressive_narrator", "description": "A voice of VidLab's minimax-speech-2.8." },
+        "speed": { "type": "number", "minimum": 0.5, "maximum": 2, "default": 1.05 }
+      }
+    },
+    "music": { "type": "boolean", "default": true, "description": "Put the bundled music bed under the voice (not used for song_ad)." },
+    "compliance": { "enum": ["meta_safe", "standard"], "default": "meta_safe", "description": "meta_safe applies the Meta ad rules (no earnings claims, no amounts except the price, no money visuals)." },
+    "budget": {
+      "type": "object",
+      "required": ["max_usd"],
+      "additionalProperties": false,
+      "properties": {
+        "max_usd": { "type": "number", "minimum": 0, "maximum": 200, "description": "Hard cap on what VidLab generations may cost for this job. A paid call that would pass it is refused." },
+        "max_agent_usd": { "type": "number", "minimum": 0.05, "maximum": 50, "default": 3, "description": "Cap on the agent's own model usage (Anthropic API)." },
+        "max_turns": { "type": "integer", "minimum": 5, "maximum": 200, "default": 60 }
+      }
+    },
+    "output": {
+      "type": "object",
+      "required": ["upload_url"],
+      "additionalProperties": false,
+      "properties": {
+        "upload_url": { "type": "string", "pattern": "^https://", "description": "Where the MP4 is sent with an HTTP PUT. A Bunny Storage URL (https://storage.bunnycdn.com/<zone>/<path>.mp4) or any pre-signed URL." },
+        "thumbnail_upload_url": { "type": "string", "pattern": "^https://" },
+        "upload_headers": { "type": "object", "additionalProperties": { "type": "string" }, "description": "Extra upload headers. For Bunny Storage, AccessKey is added from BUNNY_STORAGE_API_KEY when it is not given here." },
+        "public_url": { "type": "string", "pattern": "^https://", "description": "The URL the video is readable at after upload (your Bunny pull zone). Reported as video_url." },
+        "thumbnail_public_url": { "type": "string", "pattern": "^https://" }
+      }
+    },
+    "webhooks": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Both are POSTed JSON, signed with HMAC-SHA256 (headers X-Tap-Timestamp and X-Tap-Signature: sha256=<hex of timestamp + \".\" + body>).",
+      "properties": {
+        "progress_url": { "type": "string", "pattern": "^https://" },
+        "result_url": { "type": "string", "pattern": "^https://" },
+        "secret": { "type": "string", "minLength": 16, "description": "HMAC secret for this job. Default: the WEBHOOK_SECRET environment variable." }
+      }
+    },
+    "metadata": { "type": "object", "description": "Anything; echoed back in the result." }
+  }
+}

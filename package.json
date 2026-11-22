@@ -3,9 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Headless renderer for TAP Affiliate Network 9:16 video ads: JSON video plan in, MP4 + thumbnail out.",
-  "bin": { "render": "bin/render.mjs" },
-  "engines": { "node": ">=20" },
+  "description": "Headless renderer for TAP Affiliate Network video ads (JSON video plan in, MP4 out) and the TAP Studio Agent that plans and makes the videos.",
+  "bin": {
+    "render": "bin/render.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "render": "node bin/render.mjs",
     "serve": "node server/server.mjs",
@@ -14,22 +18,29 @@
     "validate": "node bin/render.mjs --validate-only --plan",
     "studio": "remotion studio src/index.ts",
     "typecheck": "tsc --noEmit",
-    "lambda:deploy": "node scripts/lambda-deploy.mjs"
+    "lambda:deploy": "node scripts/lambda-deploy.mjs",
+    "agent": "node agent/run.mjs",
+    "trigger:dev": "trigger.dev dev",
+    "trigger:deploy": "trigger.dev deploy --env prod"
   },
   "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.3.330",
     "@remotion/bundler": "4.0.533",
     "@remotion/cli": "4.0.533",
     "@remotion/renderer": "4.0.533",
+    "@trigger.dev/sdk": "^4.8.8",
     "ajv": "^8.17.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "remotion": "4.0.533",
-    "simple-icons": "16.34.0"
+    "simple-icons": "16.34.0",
+    "zod": "^4.6.7"
   },
   "optionalDependencies": {
     "@remotion/lambda": "4.0.533"
   },
   "devDependencies": {
+    "@trigger.dev/build": "^4.8.8",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "typescript": "^5.6.3"

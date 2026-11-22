@@ -18,6 +18,23 @@ const TAPE = P(str, "Text of the diagonal orange ticker tape across the top. Lea
 const COVER = (def) => P(str, "Slideshow cover photo: a bundled name (recipe, travel, apps, gym, study, desk) or an image URL.", { def });
 
 export const SCENES = {
+  footage: {
+    title: "Video footage",
+    summary: "A video clip played full-frame (AI footage, a reaction clip, a song video), with an optional orange tag and white headline at the top over a soft dark gradient. The caption pill runs on top as on every scene. The clip's own sound is off unless `volume` is set.",
+    props: {
+      url: P(str, "The clip: an http(s) URL, or (CLI only) a file path relative to the plan file. MP4 (H.264) or MOV.", { req: true }),
+      startFrom: P({ type: "number", minimum: 0 }, "Seconds to skip at the start of the clip.", { def: 0 }),
+      clipSeconds: P({ type: "number", exclusiveMinimum: 0 }, "Length of the clip in seconds. Set it when the scene is longer than the clip, so the clip loops instead of running out."),
+      volume: P({ type: "number", minimum: 0, maximum: 1 }, "Volume of the clip's own sound (0 = muted).", { def: 0 }),
+      fit: P({ enum: ["cover", "contain"] }, "How the clip fills the 9:16 frame.", { def: "cover" }),
+      dim: P({ type: "number", minimum: 0, maximum: 1 }, "Darken the whole clip by this much.", { def: 0 }),
+      tag: P(str, "Orange tag at the top."),
+      tagCue: P(cue, "When the tag pops in."),
+      head: P({ anyOf: [str, strs(1, 3)] }, "White headline line(s) under the tag. `*word*` gets the orange highlight box."),
+      headCue: P(cue, "When the headline slams in."),
+    },
+    example: { url: "https://cdn.example.com/clips/reaction.mp4", clipSeconds: 5, tag: "POV", head: ["YOUR FIRST", "*COMMISSION*"], headCue: 0.4 },
+  },
   ticker: {
     title: "Ticker tape banner",
     summary: "Two diagonal tape tickers (top and bottom) scrolling the same text, with optional headline lines between them. A single tape is also available as the `tape` prop on `pills`, `strike_list` and `profile`.",

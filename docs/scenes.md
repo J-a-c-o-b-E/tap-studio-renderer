@@ -17,6 +17,7 @@ Every scene in a plan looks like this:
 
 | Type | What it is |
 |---|---|
+| [`footage`](#footage) | Video footage |
 | [`ticker`](#ticker) | Ticker tape banner |
 | [`pills`](#pills) | Pill list with ticks |
 | [`checklist`](#checklist) | Checklist card |
@@ -40,6 +41,40 @@ Every scene in a plan looks like this:
 | [`views`](#views) | Views card |
 | [`result_card`](#result_card) | Result card |
 | [`fan_out`](#fan_out) | Fan-out of people |
+
+## `footage`
+
+**Video footage.** A video clip played full-frame (AI footage, a reaction clip, a song video), with an optional orange tag and white headline at the top over a soft dark gradient. The caption pill runs on top as on every scene. The clip's own sound is off unless `volume` is set.
+
+| Prop | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `url` | string | yes |  | The clip: an http(s) URL, or (CLI only) a file path relative to the plan file. MP4 (H.264) or MOV. |
+| `startFrom` | number | no | `0` | Seconds to skip at the start of the clip. |
+| `clipSeconds` | number | no |  | Length of the clip in seconds. Set it when the scene is longer than the clip, so the clip loops instead of running out. |
+| `volume` | number | no | `0` | Volume of the clip's own sound (0 = muted). |
+| `fit` | `cover` \| `contain` | no | `"cover"` | How the clip fills the 9:16 frame. |
+| `dim` | number | no | `0` | Darken the whole clip by this much. |
+| `tag` | string | no |  | Orange tag at the top. |
+| `tagCue` | cue | no |  | When the tag pops in. |
+| `head` | string \| string[] | no |  | White headline line(s) under the tag. `*word*` gets the orange highlight box. |
+| `headCue` | cue | no |  | When the headline slams in. |
+
+```json
+{
+  "type": "footage",
+  "duration": 4,
+  "props": {
+    "url": "https://cdn.example.com/clips/reaction.mp4",
+    "clipSeconds": 5,
+    "tag": "POV",
+    "head": [
+      "YOUR FIRST",
+      "*COMMISSION*"
+    ],
+    "headCue": 0.4
+  }
+}
+```
 
 ## `ticker`
 

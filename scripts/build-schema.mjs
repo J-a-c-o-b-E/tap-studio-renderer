@@ -108,6 +108,7 @@ const typeOf = (s) => {
   }
   if (t === "object" || t === "object \\| null") return `{ ${Object.keys(s.properties ?? {}).join(", ")} }${t.includes("null") ? " \\| null" : ""}`;
   if (t === "string \\| number") return "cue";
+  if (s.anyOf) return "string \\| string[]";
   return t;
 };
 

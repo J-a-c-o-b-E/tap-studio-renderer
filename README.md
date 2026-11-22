@@ -10,6 +10,10 @@ Built on [Remotion](https://www.remotion.dev) 4. Everything it needs (fonts, log
 render --plan plan.json --out out.mp4
 ```
 
+## TAP Studio Agent
+
+The repo also holds the **TAP Studio Agent**: a Claude Agent SDK agent that takes a *job* ("make a 30 s motion VSL for the Starter Course, budget $0.50"), writes the script, makes the voiceover and any AI footage with [VidLab](https://vidlab.ai), builds a plan and renders it **with this renderer**. It runs as the Trigger.dev task `generate-video`. The renderer and its HTTP server work exactly as before; the agent is a separate entry point that calls `render --plan … --out …` as a tool. See [docs/agent.md](docs/agent.md).
+
 ## Contents
 
 | Path | What |
@@ -88,6 +92,7 @@ Full reference: [`schema/plan.schema.json`](schema/plan.schema.json) and [`docs/
 | `views` | A post, a views card and a stamp ("NOT VIRAL") |
 | `result_card` | Big tick card ("1 PAID CONVERSION") |
 | `fan_out` | A post with rings of people fanning out ("FOLLOWERS DON'T MATTER") |
+| `footage` | A video clip full-frame (AI footage, a reaction, a song video) with optional tag and headline |
 
 Backgrounds are `cream` (dot grid), `orange` and `black`, set with `bg` on the scenes that allow it. The caption pill runs over every scene unless `captions.enabled` is `false`.
 
