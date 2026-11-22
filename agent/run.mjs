@@ -18,7 +18,7 @@ const args = process.argv.slice(2);
 const value = (name) => (args.includes(name) ? args[args.indexOf(name) + 1] : undefined);
 const jobFile = value("--job");
 if (!jobFile) {
-  console.error("usage: node agent/run.mjs --job <job.json> [--keep <folder>] [--validate-only]");
+  console.error("usage: node agent/run.mjs --job <job.json> [--keep <folder>] [--no-upload] [--validate-only]");
   process.exit(1);
 }
 const { runJob, validateJob } = await import("./index.mjs");
@@ -28,6 +28,6 @@ if (args.includes("--validate-only")) {
   console.log(problems.length ? `invalid job:\n- ${problems.join("\n- ")}` : `OK: ${job.format} job ${job.job_id}`);
   process.exit(problems.length ? 2 : 0);
 }
-const result = await runJob(job, { keepDir: value("--keep"), onEvent: (e) => e.event === "job.progress" && process.stderr.write(`[${e.stage}] ${e.message} ($${e.spent_usd.toFixed(2)})\n`) });
+const result = await runJob(job, { keepDir: value("--keep"), upload: !args.includes("--no-upload"), onEvent: (e) => e.event === "job.progress" && process.stderr.write(`[${e.stage}] ${e.message} ($${e.spent_usd.toFixed(2)})\n`) });
 console.log(JSON.stringify(result, null, 2));
 process.exit(result.status === "succeeded" ? 0 : 3);

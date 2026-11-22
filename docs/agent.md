@@ -64,7 +64,7 @@ Every field is described in [`schemas/job.schema.json`](../schemas/job.schema.js
 - **`product.facts`**: the agent states only what is here, in the brief or in `script`. It does not invent numbers or results.
 - **`budget.max_usd`**: a hard cap on VidLab spending. Each paid call is priced first and refused if it would pass the cap. `budget.max_agent_usd` (default 3) caps the agent's own model usage.
 - **`compliance`**: `meta_safe` (default) applies the Meta ad rules in `.claude/skills/safety`. The plan, the captions and the script are scanned before rendering and again before hand-in; a video that fails is not delivered.
-- **`output.upload_url`**: the MP4 is sent with an HTTP `PUT`. For Bunny Storage (`https://storage.bunnycdn.com/<zone>/<path>`), the `AccessKey` header comes from `BUNNY_STORAGE_API_KEY` unless the job gives `upload_headers`.
+- **`output.upload_url`**: the MP4 is sent with an HTTP `PUT`. For Bunny Stream (`https://video.bunnycdn.com/library/<library>/videos/<video id>`) the `AccessKey` header comes from `BUNNY_STREAM_API_KEY`; for Bunny Storage (`https://storage.bunnycdn.com/<zone>/<path>`) from `BUNNY_STORAGE_API_KEY`; a job can override it with `upload_headers`.
 
 ## The result
 
@@ -105,7 +105,7 @@ X-Tap-Timestamp: 1790000000
 X-Tap-Signature: sha256=<hex HMAC-SHA256 of "<timestamp>.<raw body>" with the secret>
 ```
 
-The secret is `webhooks.secret` in the job, or else the `WEBHOOK_SECRET` environment variable. Verify in your app:
+The secret is `webhooks.secret` in the job, or else the `WEBHOOK_HMAC_SECRET` environment variable. Verify in your app:
 
 ```js
 const expected = "sha256=" + crypto.createHmac("sha256", secret).update(`${req.headers["x-tap-timestamp"]}.${rawBody}`).digest("hex");
@@ -118,8 +118,9 @@ const ok = crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(req.headers
 |---|---|---|
 | `ANTHROPIC_API_KEY` | yes | the agent's model access |
 | `VIDLAB_API_KEY` | yes | VidLab generations (also the voiceover for `motion_vsl`) |
-| `BUNNY_STORAGE_API_KEY` | for Bunny Storage uploads | storage zone password, sent as `AccessKey` |
-| `WEBHOOK_SECRET` | if you use webhooks | default HMAC secret |
+| `BUNNY_STREAM_API_KEY` | for Bunny Stream uploads | sent as `AccessKey` when `upload_url` is on `video.bunnycdn.com` |
+| `BUNNY_STORAGE_API_KEY` | for Bunny Storage uploads | storage zone password, sent as `AccessKey` when `upload_url` is on `storage.bunnycdn.com` |
+| `WEBHOOK_HMAC_SECRET` | if you use webhooks | default HMAC secret |
 | `AGENT_MODEL` | no | default `claude-fable-5-2` |
 | `TRIGGER_PROJECT_REF` | build time | your Trigger.dev project ref (`proj_…`) |
 
@@ -139,7 +140,7 @@ node agent/run.mjs --job examples/jobs/motion_vsl.json --keep out/jobs
 
 - secret `TRIGGER_ACCESS_TOKEN`: an API key of your project's **Production** environment (Trigger.dev dashboard → your project → Production → API keys → New API key);
 - variable `TRIGGER_PROJECT_REF`: your project ref (`proj_…`);
-- optionally the secrets `ANTHROPIC_API_KEY`, `VIDLAB_API_KEY`, `BUNNY_STORAGE_API_KEY`, `WEBHOOK_SECRET`: when present they are copied into Trigger.dev Production on each deploy. Otherwise set them in the dashboard under Environment variables.
+- optionally the secrets `ANTHROPIC_API_KEY`, `VIDLAB_API_KEY`, `BUNNY_STORAGE_API_KEY`, `WEBHOOK_HMAC_SECRET`: when present they are copied into Trigger.dev Production on each deploy. Otherwise set them in the dashboard under Environment variables.
 
 **From your machine.**
 

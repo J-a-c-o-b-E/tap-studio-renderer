@@ -46,7 +46,7 @@ export const runJob = async (job, opts = {}) => {
   const startedAt = new Date().toISOString();
   const t0 = Date.now();
   const hooks = job?.webhooks ?? {};
-  const secret = hooks.secret ?? process.env.WEBHOOK_SECRET ?? "";
+  const secret = hooks.secret ?? process.env.WEBHOOK_HMAC_SECRET ?? process.env.WEBHOOK_SECRET ?? "";
   const ledger = new Ledger(job?.budget?.max_usd ?? 0);
   const model = process.env.AGENT_MODEL || DEFAULT_MODEL;
   const agentStats = { model, turns: 0, usd: 0 };
@@ -148,12 +148,15 @@ export const runJob = async (job, opts = {}) => {
     const done = ctx.state.finish;
     if (!done) return failed(agentError?.code ?? "no_video", agentError?.message ?? "the agent ended without handing in a video");
 
-    emit("uploading", "video", true);
     const out = job.output;
     const thumb = done.file.replace(/\.mp4$/i, ".jpg");
-    await putFile(done.file, out.upload_url, out.upload_headers ?? {});
+    const upload = opts.upload !== false; // local test runs can skip the upload
+    if (upload) {
+      emit("uploading", "video", true);
+      await putFile(done.file, out.upload_url, out.upload_headers ?? {});
+    }
     let thumbnailUrl = null;
-    if (out.thumbnail_upload_url && existsSync(thumb)) {
+    if (upload && out.thumbnail_upload_url && existsSync(thumb)) {
       await putFile(thumb, out.thumbnail_upload_url, out.upload_headers ?? {});
       thumbnailUrl = out.thumbnail_public_url ?? out.thumbnail_upload_url.split("?")[0];
     }
@@ -174,7 +177,7 @@ export const runJob = async (job, opts = {}) => {
     }
     return finishResult({
       status: "succeeded",
-      video_url: out.public_url ?? out.upload_url.split("?")[0],
+      video_url: upload ? (out.public_url ?? out.upload_url.split("?")[0]) : null,
       thumbnail_url: thumbnailUrl,
       video: { duration_s: done.info.duration_s, width: done.info.video.width, height: done.info.video.height, fps: done.info.video.fps, bytes: done.info.bytes, loudness_lufs: Number.isFinite(loudness) ? loudness : null },
       title: done.title,

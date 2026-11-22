@@ -71,7 +71,7 @@
       "properties": {
         "progress_url": { "type": "string", "pattern": "^https://" },
         "result_url": { "type": "string", "pattern": "^https://" },
-        "secret": { "type": "string", "minLength": 16, "description": "HMAC secret for this job. Default: the WEBHOOK_SECRET environment variable." }
+        "secret": { "type": "string", "minLength": 16, "description": "HMAC secret for this job. Default: the WEBHOOK_HMAC_SECRET environment variable." }
       }
     },
     "metadata": { "type": "object", "description": "Anything; echoed back in the result." }

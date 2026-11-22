@@ -10,8 +10,8 @@ import { execFileSync } from "node:child_process";
 
 // The keys the task needs at run time. On deploy, any of these present in the deploy environment
 // (GitHub Actions secrets, or your shell) are copied into the Trigger.dev environment being deployed to.
-const RUNTIME_ENV = ["ANTHROPIC_API_KEY", "VIDLAB_API_KEY", "BUNNY_STORAGE_API_KEY", "WEBHOOK_SECRET", "AGENT_MODEL"];
-const SECRET = new Set(["ANTHROPIC_API_KEY", "VIDLAB_API_KEY", "BUNNY_STORAGE_API_KEY", "WEBHOOK_SECRET"]);
+const RUNTIME_ENV = ["ANTHROPIC_API_KEY", "VIDLAB_API_KEY", "BUNNY_STREAM_API_KEY", "BUNNY_STORAGE_API_KEY", "WEBHOOK_HMAC_SECRET", "AGENT_MODEL"];
+const SECRET = new Set(["ANTHROPIC_API_KEY", "VIDLAB_API_KEY", "BUNNY_STREAM_API_KEY", "BUNNY_STORAGE_API_KEY", "WEBHOOK_HMAC_SECRET"]);
 
 /** Builds the Remotion bundle (build/) before the deploy, and installs Chrome Headless Shell in the image. */
 const renderer = (): BuildExtension => ({

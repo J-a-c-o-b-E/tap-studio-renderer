@@ -218,10 +218,18 @@ export const sendWebhook = async (url, secret, payload, { retries = 3 } = {}) =>
   return false;
 };
 
-/** PUT a file to its upload URL. Bunny Storage gets its AccessKey header from BUNNY_STORAGE_API_KEY unless the job gave one. */
+/** The AccessKey Bunny expects for a host, from the environment: Storage (storage.bunnycdn.com) or Stream (video.bunnycdn.com). */
+const bunnyKey = (host) => {
+  if (/(^|\.)video\.bunnycdn\.com$/i.test(host)) return process.env.BUNNY_STREAM_API_KEY;
+  if (/(^|\.)bunnycdn\.com$/i.test(host)) return process.env.BUNNY_STORAGE_API_KEY;
+  return undefined;
+};
+
+/** PUT a file to its upload URL. Bunny URLs get their AccessKey header from the environment unless the job gave one. */
 export const putFile = async (file, url, headers = {}) => {
   const h = { "Content-Type": mimeOf(file), "Content-Length": String(statSync(file).size), ...headers };
-  if (/(^|\.)bunnycdn\.com$/i.test(new URL(url).hostname) && !Object.keys(h).some((k) => k.toLowerCase() === "accesskey") && process.env.BUNNY_STORAGE_API_KEY) h.AccessKey = process.env.BUNNY_STORAGE_API_KEY;
+  const key = bunnyKey(new URL(url).hostname);
+  if (key && !Object.keys(h).some((k) => k.toLowerCase() === "accesskey")) h.AccessKey = key;
   const res = await fetch(url, { method: "PUT", headers: h, body: createReadStream(file), duplex: "half", signal: AbortSignal.timeout(600000) });
   if (!res.ok) throw Object.assign(new Error(`upload to ${new URL(url).hostname} failed: HTTP ${res.status} ${(await res.text()).slice(0, 200)}`), { code: "upload_failed" });
 };
