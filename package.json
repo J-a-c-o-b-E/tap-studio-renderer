@@ -1,0 +1,37 @@
+{
+  "name": "tap-studio-renderer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Headless renderer for TAP Affiliate Network 9:16 video ads: JSON video plan in, MP4 + thumbnail out.",
+  "bin": { "render": "bin/render.mjs" },
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "render": "node bin/render.mjs",
+    "serve": "node server/server.mjs",
+    "build": "node scripts/build-schema.mjs && node scripts/bundle.mjs",
+    "schema": "node scripts/build-schema.mjs",
+    "validate": "node bin/render.mjs --validate-only --plan",
+    "studio": "remotion studio src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "lambda:deploy": "node scripts/lambda-deploy.mjs"
+  },
+  "dependencies": {
+    "@remotion/bundler": "4.0.533",
+    "@remotion/cli": "4.0.533",
+    "@remotion/renderer": "4.0.533",
+    "ajv": "^8.17.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "remotion": "4.0.533",
+    "simple-icons": "16.34.0"
+  },
+  "optionalDependencies": {
+    "@remotion/lambda": "4.0.533"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^5.6.3"
+  }
+}
