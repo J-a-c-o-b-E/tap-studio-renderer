@@ -1,0 +1,41 @@
+{
+  "$schema": "../../schemas/job.schema.json",
+  "job_id": "starter-course-song-001",
+  "format": "song_ad",
+  "product": {
+    "name": "TAP Affiliate Starter Course",
+    "price": "$5",
+    "cta": "GET STARTED –",
+    "url": "https://jointap.co",
+    "facts": [
+      "TAP is an affiliate network with 240+ affiliates and 110+ offers.",
+      "The course is 5 short lessons that take you to your first live offer.",
+      "After the lessons you get a 1-on-1 with James, the founder of TAP, on Telegram.",
+      "You need no followers, no product of your own and no face on camera.",
+      "Affiliates post simple slideshows for apps, Telegram communities and brands, and earn a commission when someone joins, signs up or buys through their link.",
+      "The launch price is $5 for the first 100 members."
+    ]
+  },
+  "brief": "A short, catchy, upbeat pop jingle about starting affiliate marketing with no followers, no product and no face, and a five dollar starter course. About 30 seconds.",
+  "duration_s": 30,
+  "language": "English",
+  "compliance": "meta_safe",
+  "budget": {
+    "max_usd": 15,
+    "max_agent_usd": 3,
+    "max_turns": 60
+  },
+  "output": {
+    "upload_url": "https://storage.bunnycdn.com/YOUR_STORAGE_ZONE/tap-studio/starter-course-song-001.mp4",
+    "thumbnail_upload_url": "https://storage.bunnycdn.com/YOUR_STORAGE_ZONE/tap-studio/starter-course-song-001.jpg",
+    "public_url": "https://YOUR_PULL_ZONE.b-cdn.net/tap-studio/starter-course-song-001.mp4",
+    "thumbnail_public_url": "https://YOUR_PULL_ZONE.b-cdn.net/tap-studio/starter-course-song-001.jpg"
+  },
+  "webhooks": {
+    "progress_url": "https://your-app.example.com/api/tap-studio/progress",
+    "result_url": "https://your-app.example.com/api/tap-studio/result"
+  },
+  "metadata": {
+    "campaign": "starter-course-launch"
+  }
+}

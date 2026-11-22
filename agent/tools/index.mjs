@@ -113,7 +113,7 @@ export const createTapTools = (ctx) => {
           while (!["succeeded", "failed", "cancelled"].includes(runState.status)) {
             if (runState.status === "needs_input" || runState.status === "needs_approval") {
               await vidlab("POST", `/system-runs/${runState.run_id}/cancel`).catch(() => {});
-              throw Object.assign(new Error(`the song ad stopped for a decision (${runState.error?.code ?? runState.waiting_for ?? runState.status}): ${runState.message ?? "it would pass the spending limit or needs more credit"}. It was cancelled.`), { code: runState.error?.code ?? "system_run_stopped" });
+              throw Object.assign(new Error(`the song ad stopped for a decision (${runState.error?.code ?? runState.waiting_for ?? runState.status}): ${runState.message ?? "it would pass the spending limit or needs more credit"}. It was cancelled; what it had already spent is not refunded.`), { code: runState.error?.code ?? "system_run_stopped" });
             }
             if (Date.now() - started > 45 * 60000) {
               await vidlab("POST", `/system-runs/${runState.run_id}/cancel`).catch(() => {});
@@ -150,6 +150,10 @@ export const createTapTools = (ctx) => {
         const dir = inWork("vo");
         mkdirSync(dir, { recursive: true });
         ctx.progress("voiceover", `${lines.length} lines`);
+        // the lines are generated four at a time: one after another they would take longer than a tool call may run
+        for (let i = 0; i < lines.length; i += 4) {
+          await Promise.all(lines.slice(i, i + 4).map((l, k) => generate(ledger, { model: "minimax-speech-2.8", input: { text: l.text, voice, quality: "turbo", extra: { speed } }, label: `voiceover line ${i + k + 1}`, file: path.join(dir, `${i + k}.mp3`) })));
+        }
         const parts = [];
         let t = offset_s;
         const words = [];
@@ -157,7 +161,6 @@ export const createTapTools = (ctx) => {
         for (let i = 0; i < lines.length; i++) {
           const raw = path.join(dir, `${i}.mp3`);
           const wav = path.join(dir, `${i}.wav`);
-          await generate(ledger, { model: "minimax-speech-2.8", input: { text: lines[i].text, voice, quality: "turbo", extra: { speed } }, label: `voiceover line ${i + 1}`, file: raw });
           // trim the silence at both ends so cuts land on the words
           await ffmpeg(["-i", raw, "-af", "silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.02,areverse,silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.05,areverse", "-ar", "48000", "-ac", "1", wav]);
           const dur = (await probe(wav)).duration_s;

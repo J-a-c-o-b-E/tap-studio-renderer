@@ -125,7 +125,8 @@ export const runJob = async (job, opts = {}) => {
         permissionMode: "default",
         maxTurns: job.budget.max_turns ?? 60,
         maxBudgetUsd: job.budget.max_agent_usd ?? 3,
-        env: { ...process.env, CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1" },
+        // renders and generations run for minutes inside one tool call
+        env: { ...process.env, CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1", MCP_TOOL_TIMEOUT: "2700000", MCP_TIMEOUT: "120000" },
       },
     });
     for await (const msg of stream) {
@@ -138,11 +139,7 @@ export const runJob = async (job, opts = {}) => {
         agentStats.usd = msg.total_cost_usd ?? 0;
         if (msg.subtype !== "success" || msg.is_error) agentError = { code: `agent_${msg.subtype}`, message: msg.subtype === "success" ? String(msg.result).slice(0, 500) : `the agent stopped early (${msg.subtype})` };
       }
-      if (ctx.state.finish) {
-        // the video is accepted: no need to pay for a closing message
-        abort.abort();
-        break;
-      }
+      if (msg.type === "result") break;
     }
 
     const done = ctx.state.finish;
